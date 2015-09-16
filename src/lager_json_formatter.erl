@@ -9,7 +9,7 @@ format(Msg, Config, _) ->
   format(Msg, Config).
 
 -spec format(lager_msg:lager_msg(),list()) -> any().
-format(Msg, Config) ->
+format(Msg, _Config) ->
   [jsx:encode(json_handler(Msg)), <<"\n">>].
 
 -spec json_handler(lager_msg:lager_msg()) -> any().
