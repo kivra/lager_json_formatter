@@ -10,23 +10,19 @@ format(Msg, Config, _) ->
 
 -spec format(lager_msg:lager_msg(),list()) -> any().
 format(Msg, Config) ->
-  Encoder = mochijson2:encoder([
-    {handler, fun json_handler/1},
-    {utf8, proplists:get_value(utf8, Config, true)}
-  ]),
-  [Encoder(Msg), <<"\n">>].
+  [jsx:encode(json_handler(Msg)), <<"\n">>].
 
 -spec json_handler(lager_msg:lager_msg()) -> any().
 json_handler(Msg) ->
   {Date, Time} = lager_msg:datetime(Msg),
   Metadata = [ {K, make_printable(V)} || {K, V} <- lager_msg:metadata(Msg)],
-  {struct, [
+  [
     {<<"@timestamp">>, iolist_to_binary([Date, $T, Time, $Z])},
     {message, iolist_to_binary(lager_msg:message(Msg))},
     {level, severity_to_binary(lager_msg:severity(Msg))},
     {level_as_int, lager_msg:severity_as_int(Msg)},
     {destinations, lager_msg:destinations(Msg)}
-  | Metadata]}.
+  | Metadata].
 
 make_printable(A) when is_atom(A) orelse is_binary(A) orelse is_number(A) -> A;
 make_printable(P) when is_pid(P) -> iolist_to_binary(pid_to_list(P));
